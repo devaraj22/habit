@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   LineChart, 
   Line, 
@@ -25,6 +25,8 @@ import {
   ArrowRight,
   MoreHorizontal
 } from 'lucide-react';
+
+import { loadState, saveState } from './storage';
 
 // --- Constants & Config ---
 
@@ -134,6 +136,42 @@ export default function App() {
   ]);
 
   const [reflection, setReflection] = useState("");
+  const saveTimer = useRef(null);
+
+  useEffect(() => {
+    const saved = loadState();
+    if (saved) {
+      if (saved.habits) setHabits(saved.habits);
+      if (saved.weeklyHabits) setWeeklyHabits(saved.weeklyHabits);
+      if (saved.monthlyHabits) setMonthlyHabits(saved.monthlyHabits);
+      if (typeof saved.reflection === 'string') setReflection(saved.reflection);
+      if (saved.affirmationImage) setAffirmationImage(saved.affirmationImage);
+      if (saved.month) setMonth(saved.month);
+      if (saved.year) setYear(saved.year);
+      if (saved.theme) setTheme(saved.theme);
+    }
+  }, []);
+
+  // auto-save (debounced)
+  useEffect(() => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      saveState({
+        habits,
+        weeklyHabits,
+        monthlyHabits,
+        reflection,
+        affirmationImage,
+        month,
+        year,
+        theme
+      });
+    }, 700);
+
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [habits, weeklyHabits, monthlyHabits, reflection, affirmationImage, month, year, theme]);
 
   // --- Calculations ---
   const chartData = useMemo(() => {
