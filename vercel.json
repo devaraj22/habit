@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "buildCommand": "cd server && npm install && cd .. && npm install && npm run build",
+  "devCommand": "npm run dev",
+  "env": {
+    "JWT_SECRET": "@jwt_secret"
+  },
+  "functions": {
+    "server/server.js": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/server"
+    }
+  ]
+}
